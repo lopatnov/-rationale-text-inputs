@@ -1,0 +1,17 @@
+{
+  "name": "@rationale/text-inputs",  
+  "version": "0.0.1",
+  "author": {
+    "name": "lopatnov",
+    "email": "oleksandr@lopatnov.cv.ua",
+    "url": "https://lopatnov.cv.ua"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lopatnov/rationale-text-inputs.git"
+  },
+  "peerDependencies": {
+    "@angular/common": "^6.0",
+    "@angular/core": "^6.0"
+  }
+}
