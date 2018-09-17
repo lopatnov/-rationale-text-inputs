@@ -1,10 +1,11 @@
 import { NgModule } from '@angular/core';
-import { TextInputsComponent } from './text-inputs.component';
+
+import { RationaleInputIntDirective } from './rationale-input-int.directive/rationale-input-int.directive';
 
 @NgModule({
   imports: [
   ],
-  declarations: [TextInputsComponent],
-  exports: [TextInputsComponent]
+  declarations: [RationaleInputIntDirective],
+  exports: [RationaleInputIntDirective]
 })
 export class TextInputsModule { }
