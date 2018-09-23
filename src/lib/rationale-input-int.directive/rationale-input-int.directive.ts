@@ -1,15 +1,6 @@
 import { Directive, Renderer2, ElementRef, forwardRef, HostListener, Input, OnInit } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-const keyDelete = 46;
-const keyBackspace = 8;
-const keyEnter = 13;
-const keyTab = 9;
-const keyEnd = 35;
-const keyHome = 36;
-const keyLeft = 37;
-const keyRight = 39;
-
 @Directive({
   selector: '[rationale-input-int]',
   providers: [{
@@ -19,7 +10,6 @@ const keyRight = 39;
   }]
 })
 export class RationaleInputIntDirective implements ControlValueAccessor, OnInit {
-  private static readonly escapeKeyList = [keyDelete, keyBackspace, keyEnter, keyTab, keyEnd, keyHome, keyLeft, keyRight];
   private renderer: Renderer2;
   private elementRef: ElementRef;
   private touch: () => void;
@@ -37,9 +27,9 @@ export class RationaleInputIntDirective implements ControlValueAccessor, OnInit 
 
   @HostListener('keydown', ['$event'])
   onKeyDown(event: KeyboardEvent) {
-    if (event.metaKey || event.ctrlKey || event.altKey || RationaleInputIntDirective.escapeKeyList.indexOf(event.keyCode) !== -1) {
+    if (event.metaKey || event.ctrlKey || event.altKey) {
       return;
-    } else if (!event.key.match(/\d/g)) {
+    } else if (event.key.length <= 1 && !event.key.match(/\d/g)) {
       event.preventDefault();
     }
   }
@@ -47,7 +37,11 @@ export class RationaleInputIntDirective implements ControlValueAccessor, OnInit 
   @HostListener('input', ['$event'])
   onInput(event: Event) {
     const target = event.currentTarget as HTMLInputElement;
-    this.change(Number.parseInt(target.value, 10));
+    let value = Number.parseInt(target.value, 10);
+    if (!Number.isFinite(value)) {
+      value = this.default;
+    }
+    this.change(value);
   }
 
   @HostListener('paste', ['$event'])
@@ -65,7 +59,7 @@ export class RationaleInputIntDirective implements ControlValueAccessor, OnInit 
   }
 
   @HostListener('blur', ['$event'])
-  onBlur(event: Event) {
+  onBlur() {
     this.touch();
   }
 
