@@ -6,9 +6,9 @@ Rationale is the Angular framework. @rationale/text-inputs is Rationale library.
 
 ### RationaleInputIntDirective
 
-    selector: *[rationale-input-int]*
+    selector: [rationale-input-int]
 
-    | Decorator | Type   | Param   | Description |
-    |:--------- |:------ |:------- | :--- |
-    | Input     | number | default | The default value of empty input |
+| Decorator | Type   | Param   | Description |
+|:--------- |:------ |:------- | :--- |
+| Input     | number | default | The default value of empty input |
     
