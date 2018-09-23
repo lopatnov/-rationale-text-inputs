@@ -1,17 +1,30 @@
 {
-  "name": "@rationale/text-inputs",  
+  "name": "@rationale/text-inputs",
   "version": "0.0.1",
-  "author": {
-    "name": "lopatnov",
-    "email": "oleksandr@lopatnov.cv.ua",
-    "url": "https://lopatnov.cv.ua"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/lopatnov/rationale-text-inputs.git"
+  "author": "lopatnov <oleksandr@lopatnov.cv.ua> (https://lopatnov.cv.ua)",
+  "description": "Rationale is the Angular framework libraries. The text-inputs library is intended for processing of text data in html element inputs.",
+  "main": "./src/public_api.ts",
+  "scripts": {
+    "test": "ng test @rationale/text-inputs"
   },
   "peerDependencies": {
     "@angular/common": "^6.0",
-    "@angular/core": "^6.0"
-  }
+    "@angular/core": "^6.0",
+    "@angular/forms": "^6.0"
+  },
+  "homepage": "https://github.com/lopatnov/rationale-text-inputs#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lopatnov/rationale-text-inputs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lopatnov/rationale-text-inputs/issues"
+  },
+  "keywords": [
+    "angular",
+    "angular2",
+    "text",
+    "input"
+  ],
+  "license": "Apache-2.0"
 }
