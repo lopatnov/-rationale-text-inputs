@@ -1,6 +1,6 @@
 {
   "name": "@rationale/text-inputs",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "author": "lopatnov <oleksandr@lopatnov.cv.ua> (https://lopatnov.cv.ua)",
   "description": "Rationale is the Angular framework libraries. The text-inputs library is intended for processing of text data in html element inputs.",
   "main": "./src/public_api.ts",
