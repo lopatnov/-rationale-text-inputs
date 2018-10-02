@@ -12,7 +12,10 @@ const localFormat = (() => {
       delimiter: delimiters[0]
     };
   }
-  return {};
+  return {
+    separator: '.',
+    delimiter: ''
+  };
 })();
 
 @Directive({
@@ -61,11 +64,12 @@ export class RationaleInputNumberDirective implements OnInit, OnChanges, Control
     const target = event.currentTarget as HTMLInputElement;
     if (event.metaKey || event.ctrlKey || event.altKey) {
       return;
-    } else if (event.key.length === 1 && !event.key.match(new RegExp(`[\\d${this.separator}]`, 'gi'))) {
+    } else if (event.key.length === 1 && !event.key.match(/[\d]/gi)) {
       event.preventDefault();
-      if (event.key === '.') {
-        target.value += this.separator;
-      }
+    }
+    if (event.key === '.' || event.key === this.separator) {
+      event.preventDefault();
+      this.onAddSeparator(target);
     }
   }
 
@@ -98,5 +102,16 @@ export class RationaleInputNumberDirective implements OnInit, OnChanges, Control
 
   setDisabledState(isDisabled: boolean): void {
     this.renderer.setProperty(this.elementRef.nativeElement, 'disabled', isDisabled);
+  }
+
+  private onAddSeparator(target: HTMLInputElement) {
+    if (!this.isInt && target.value.indexOf(this.separator) === -1) {
+      const selectionStart = target.selectionStart;
+      const selectionEnd = target.selectionEnd;
+      target.value = target.value.substr(0, selectionStart) + this.separator +
+        target.value.substr(selectionEnd, target.value.length - selectionStart);
+      target.selectionStart = selectionStart + 1;
+      target.selectionEnd = target.selectionStart;
+    }
   }
 }
