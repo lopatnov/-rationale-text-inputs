@@ -30,13 +30,11 @@ export class RationaleInputNumberDirective implements OnInit, OnChanges, Control
   @HostBinding('attr.min') @Input() min: string;
   @HostBinding('attr.max') @Input() max: string;
   @HostBinding('attr.step')  @Input() step: string;
-  @HostBinding('attr.value') @Input() value: string;
+  @Input() isInt: boolean;
   @Input() prefix: string;
   @Input() suffix: string;
-  @Input() isInt: boolean;
   @Input() separator: string;
   @Input() delimiter: string;
-  @Input() selectOnFocus: boolean;
 
   private renderer: Renderer2;
   private elementRef: ElementRef;
@@ -57,6 +55,7 @@ export class RationaleInputNumberDirective implements OnInit, OnChanges, Control
     if (!this.delimiter && this.delimiter !== '') {
       this.delimiter = localFormat.delimiter;
     }
+    this.elementRef.nativeElement.value = this.formatValue(Number(this.elementRef.nativeElement.value));
   }
 
   @HostListener('keydown', ['$event'])
@@ -66,10 +65,9 @@ export class RationaleInputNumberDirective implements OnInit, OnChanges, Control
       return;
     } else if (event.key.length === 1 && !event.key.match(/[\d]/gi)) {
       event.preventDefault();
-    }
-    if (event.key === '.' || event.key === this.separator) {
-      event.preventDefault();
-      this.onAddSeparator(target);
+      if (event.key === '.' || event.key === this.separator) {
+        this.onAddSeparator(target);
+      }
     }
   }
 
@@ -85,15 +83,11 @@ export class RationaleInputNumberDirective implements OnInit, OnChanges, Control
   }
 
   writeValue(value: any): void {
-    console.log('writeValue: ', value);
-    //this.value = Number(value).toString();
+    this.elementRef.nativeElement.value = this.formatValue(Number(value));
   }
 
   registerOnChange(onChange: (value) => void): void {
     this.change = onChange;
-    if (this.value) {
-      this.change(Number(this.value));
-    }
   }
 
   registerOnTouched(onTouched: () => void): void {
@@ -104,14 +98,35 @@ export class RationaleInputNumberDirective implements OnInit, OnChanges, Control
     this.renderer.setProperty(this.elementRef.nativeElement, 'disabled', isDisabled);
   }
 
+  private formatValue(value: number) {
+    const parts = value.toString().split('.');
+    let u = parts[0];
+    let m = parts[1];
+    if (u.length > 4) {
+      for (let index = u.length - 3; index > 0; index -= 3) {
+        u = u.substr(0, index) + this.delimiter + u.substr(index);
+      }
+    }
+    if (m && m.length > 4) {
+      for (let index = m.length - 3; index > 0; index -= 3) {
+        m = m.substr(0, index) + this.delimiter + m.substr(index);
+      }
+    }
+    return u + (m && m.length ? this.separator + m : '');
+  }
+
   private onAddSeparator(target: HTMLInputElement) {
-    if (!this.isInt && target.value.indexOf(this.separator) === -1) {
+    if (!this.isInt) {
       const selectionStart = target.selectionStart;
       const selectionEnd = target.selectionEnd;
-      target.value = target.value.substr(0, selectionStart) + this.separator +
-        target.value.substr(selectionEnd, target.value.length - selectionStart);
-      target.selectionStart = selectionStart + 1;
-      target.selectionEnd = target.selectionStart;
+      const leftPart = target.value.substr(0, selectionStart);
+      const rightPart = target.value.substr(selectionEnd);
+      if ((leftPart + rightPart).indexOf(this.separator) === -1) {
+        target.value = leftPart + this.separator + rightPart;
+        target.selectionStart = selectionStart + 1;
+        target.selectionEnd = target.selectionStart;
+      }
     }
   }
+
 }
