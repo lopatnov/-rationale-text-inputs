@@ -18,6 +18,32 @@ const localFormat = (() => {
   };
 })();
 
+function defaultFormatterInt(value: string, delimiter: string): string {
+  if (value && value.length > 4) {
+    for (let index = value.length - 3; index > 0; index -= 3) {
+      value = value.substr(0, index) + delimiter + value.substr(index);
+    }
+  }
+  return value;
+}
+
+export function defaultFormatter(value: number, component: RationaleInputNumberDirective): string {
+  if (Number.isFinite(value)) {
+    const parts = value.toString().split('.');
+    const u = defaultFormatterInt(parts[0], component.delimiter);
+    const m = !component.isInt && defaultFormatterInt(parts[1], component.delimiter);
+    return (component.prefix || '') + u + (m && m.length ? component.separator + m : '') + (component.suffix || '');
+  }
+  return '#';
+}
+
+export function defaultParser(value: string, component: RationaleInputNumberDirective): number {
+  if (!value) {
+    return 0;
+  }
+  return Number.parseFloat(value.replace(component.separator, '.').replace(/[^\d.]/g, ''));
+}
+
 @Directive({
   selector: '[rationale-input-number]',
   providers: [{
@@ -35,6 +61,8 @@ export class RationaleInputNumberDirective implements OnInit, OnChanges, Control
   @Input() suffix: string;
   @Input() separator: string;
   @Input() delimiter: string;
+  @Input() parse: (value: string, component: RationaleInputNumberDirective) => number;
+  @Input() format: (value: number, component: RationaleInputNumberDirective) => string;
 
   private renderer: Renderer2;
   private elementRef: ElementRef;
@@ -55,7 +83,9 @@ export class RationaleInputNumberDirective implements OnInit, OnChanges, Control
     if (!this.delimiter && this.delimiter !== '') {
       this.delimiter = localFormat.delimiter;
     }
-    this.elementRef.nativeElement.value = this.formatValue(Number(this.elementRef.nativeElement.value));
+    this.format = this.format || defaultFormatter;
+    this.parse = this.parse || defaultParser;
+    this.refresh();
   }
 
   @HostListener('keydown', ['$event'])
@@ -74,7 +104,11 @@ export class RationaleInputNumberDirective implements OnInit, OnChanges, Control
   @HostListener('input', ['$event'])
   onInput(event: Event) {
     const target = event.currentTarget as HTMLInputElement;
-    this.change(Number(target.value));
+    const offsetCharacters = this.getCharacterOffset(target);
+    const value = this.parse(target.value, this);
+    this.change(value);
+    this.elementRef.nativeElement.value = this.format(value, this);
+    offsetCharacters();
   }
 
   @HostListener('blur', ['$event'])
@@ -83,7 +117,7 @@ export class RationaleInputNumberDirective implements OnInit, OnChanges, Control
   }
 
   writeValue(value: any): void {
-    this.elementRef.nativeElement.value = this.formatValue(Number(value));
+    this.refresh(String(value));
   }
 
   registerOnChange(onChange: (value) => void): void {
@@ -98,23 +132,6 @@ export class RationaleInputNumberDirective implements OnInit, OnChanges, Control
     this.renderer.setProperty(this.elementRef.nativeElement, 'disabled', isDisabled);
   }
 
-  private formatValue(value: number) {
-    const parts = value.toString().split('.');
-    let u = parts[0];
-    let m = parts[1];
-    if (u.length > 4) {
-      for (let index = u.length - 3; index > 0; index -= 3) {
-        u = u.substr(0, index) + this.delimiter + u.substr(index);
-      }
-    }
-    if (m && m.length > 4) {
-      for (let index = m.length - 3; index > 0; index -= 3) {
-        m = m.substr(0, index) + this.delimiter + m.substr(index);
-      }
-    }
-    return u + (m && m.length ? this.separator + m : '');
-  }
-
   private onAddSeparator(target: HTMLInputElement) {
     if (!this.isInt) {
       const selectionStart = target.selectionStart;
@@ -127,6 +144,23 @@ export class RationaleInputNumberDirective implements OnInit, OnChanges, Control
         target.selectionEnd = target.selectionStart;
       }
     }
+  }
+
+  public refresh(value?: string) {
+    const offsetCharacters = this.getCharacterOffset(this.elementRef.nativeElement);
+    this.elementRef.nativeElement.value = this.format(this.parse(value || this.elementRef.nativeElement.value, this), this);
+    offsetCharacters();
+  }
+
+  private getCharacterOffset(target: HTMLInputElement) {
+    const start = target.selectionStart;
+    const end = target.selectionEnd;
+    const originalLength = target.value.length;
+    return () => {
+      const diff = target.value.length - originalLength;
+      target.selectionStart = start + diff;
+      target.selectionEnd = end + diff;
+    };
   }
 
 }
